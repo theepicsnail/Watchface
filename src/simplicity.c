@@ -4,14 +4,11 @@
 
 Window *window;
 Layer *window_layer;
-TextLayer *text_time_layer;
-Layer *line_layer;
-
-
 
 // --- battery ---
 static char battery_text[] = "100% charged";
 TextLayer *battery_layer;
+
 static void update_battery(BatteryChargeState charge_state) {
 
   if (charge_state.is_charging) {
@@ -46,12 +43,14 @@ void battery_destroy() {
 // --- time ---
 static char time_text[] = "23:59";
 TextLayer *time_layer;
+
 static void update_time(struct tm *tick_time, TimeUnits units_changed) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Time flies!");
   strftime(time_text, sizeof(time_text), "%R", tick_time);
   text_layer_set_text(time_layer, time_text);
 
 }
+
 void time_create() {
   time_layer = text_layer_create(GRect(0,-13,WIDTH, 51));// ends at 48
   text_layer_set_text_color(time_layer, GColorBlack);
@@ -63,6 +62,7 @@ void time_create() {
   update_time(localtime(&now), MINUTE_UNIT);
   tick_timer_service_subscribe(MINUTE_UNIT, update_time);
 }
+
 void time_destroy() {
   tick_timer_service_unsubscribe();
 }
@@ -73,19 +73,7 @@ void handle_deinit(void) {
   tick_timer_service_unsubscribe();
   time_destroy();
   battery_destroy();
-  //text_layer_destroy(battery_layer);
 }
-
-void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
-
-  if (!tick_time) {
-    time_t now = time(NULL);
-    tick_time = localtime(&now);
-  }
-
-
-}
-
 
 void handle_init(void) {
   window = window_create();
@@ -95,9 +83,6 @@ void handle_init(void) {
 
   time_create();
   battery_create();
-
-  tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
-  handle_minute_tick(NULL, MINUTE_UNIT);
 }
 
 int main(void) {
