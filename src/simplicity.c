@@ -6,33 +6,40 @@ Window *window;
 Layer *window_layer;
 
 // --- battery ---
-static char battery_text[] = "100% charged";
-TextLayer *battery_layer;
+Layer *battery_bar;
+BatteryChargeState battery_state;
+static void update_battery_charge(BatteryChargeState charge_state) {
+  battery_state = charge_state;
+  layer_mark_dirty(battery_bar);
+}
 
-static void update_battery(BatteryChargeState charge_state) {
-
-  if (charge_state.is_charging) {
-    snprintf(battery_text, sizeof(battery_text), "charging");
-  } else {
-    snprintf(battery_text, sizeof(battery_text), "%d%% charged", charge_state.charge_percent);
+void update_battery_tick(struct tm *tick_time, TimeUnits units_changed) {
+  if (battery_state.is_charging)
+  {
+    battery_state.charge_percent = tick_time->tm_sec%11*10;
+    layer_mark_dirty(battery_bar);
   }
-  text_layer_set_text(battery_layer, battery_text);
+}
+
+void update_battery_draw(struct Layer *layer, GContext *ctx)
+{
+  graphics_context_set_fill_color(ctx, GColorWhite);
+  graphics_fill_rect(ctx, GRect(0,0,WIDTH,HEIGHT), 0, GCornerNone);
+  graphics_context_set_fill_color(ctx, GColorBlack);
+  graphics_fill_rect(ctx, GRect(
+    2 + 14*battery_state.charge_percent/10, // 2 to 142 (2px border)
+    0,WIDTH,2), 0, GCornerNone);
 }
 
 void battery_create() {
-  TextLayer* layer = text_layer_create(GRect(0, HEIGHT-24, WIDTH, 24));
-  text_layer_set_text_color(layer, GColorBlack);
-  text_layer_set_text_alignment(layer, GTextAlignmentLeft);
-  text_layer_set_background_color(layer, GColorWhite);
-  text_layer_set_font(layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
-  text_layer_set_text(layer, "Loading");
+  battery_bar = layer_create(GRect(0,HEIGHT-2, WIDTH, 2));
+  layer_set_update_proc(battery_bar, update_battery_draw);
 
-  battery_layer = layer;
 
-  battery_state_service_subscribe(update_battery);
-  update_battery(battery_state_service_peek());
+  battery_state_service_subscribe(update_battery_charge);
+  update_battery_charge(battery_state_service_peek());
 
-  layer_add_child(window_layer, text_layer_get_layer(layer));
+  layer_add_child(window_layer, battery_bar);
 }
 
 void battery_destroy() {
@@ -69,6 +76,13 @@ void time_destroy() {
 // --- end time ---
 
 
+void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
+  if (units_changed & MINUTE_UNIT)
+    update_time(tick_time, units_changed);
+  if (units_changed & SECOND_UNIT)
+    update_battery_tick(tick_time, units_changed);
+}
+
 void handle_deinit(void) {
   tick_timer_service_unsubscribe();
   time_destroy();
@@ -83,6 +97,8 @@ void handle_init(void) {
 
   time_create();
   battery_create();
+
+  tick_timer_service_subscribe(SECOND_UNIT, handle_tick);
 }
 
 int main(void) {
