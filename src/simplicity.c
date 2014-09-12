@@ -63,9 +63,6 @@ void date_create() {
   text_layer_set_background_color(date_layer, GColorWhite);
   text_layer_set_font(date_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
   layer_add_child(window_layer, text_layer_get_layer(date_layer));
-  time_t now = time(NULL);
-  update_date(localtime(&now), DAY_UNIT);
-  tick_timer_service_subscribe(DAY_UNIT, update_date);
 }
 // --- end date ---
 
@@ -86,9 +83,6 @@ void time_create() {
   text_layer_set_background_color(time_layer, GColorWhite);
   text_layer_set_font(time_layer, fonts_get_system_font(FONT_KEY_ROBOTO_BOLD_SUBSET_49));
   layer_add_child(window_layer, text_layer_get_layer(time_layer));
-  time_t now = time(NULL);
-  update_time(localtime(&now), MINUTE_UNIT);
-  tick_timer_service_subscribe(MINUTE_UNIT, update_time);
 }
 
 void time_destroy() {
@@ -98,6 +92,10 @@ void time_destroy() {
 
 
 void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
+
+  if (units_changed & DAY_UNIT) {
+    update_date(tick_time, units_changed);
+  }
   if (units_changed & MINUTE_UNIT)
     update_time(tick_time, units_changed);
   if (units_changed & SECOND_UNIT)
@@ -121,6 +119,8 @@ void handle_init(void) {
   battery_create();
 
   tick_timer_service_subscribe(SECOND_UNIT, handle_tick);
+  time_t now = time(NULL);
+  handle_tick(localtime(&now), SECOND_UNIT | MINUTE_UNIT | DAY_UNIT);
 }
 
 int main(void) {
