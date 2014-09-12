@@ -47,6 +47,25 @@ void battery_destroy() {
 }
 // --- end battery ---
 
+// --- shortdate ---
+static char shortdate_text[] = "00/00/00";
+TextLayer *shortdate_layer;
+
+static void update_shortdate(struct tm *tick_time, TimeUnits units_changed) {
+  strftime(shortdate_text, sizeof(shortdate_text), "%D", tick_time);
+  text_layer_set_text(shortdate_layer, shortdate_text);
+}
+
+void shortdate_create() {
+  shortdate_layer = text_layer_create(GRect(0, 67, WIDTH, 25));
+  text_layer_set_text_color(shortdate_layer, GColorBlack);
+  text_layer_set_text_alignment(shortdate_layer, GTextAlignmentCenter);
+  text_layer_set_background_color(shortdate_layer, GColorWhite);
+  text_layer_set_font(shortdate_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
+  layer_add_child(window_layer, text_layer_get_layer(shortdate_layer));
+}
+// --- end shortdate---
+
 // --- date ---
 static char date_text[] = "Tue, Sep 30";
 TextLayer *date_layer;
@@ -95,6 +114,7 @@ void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
 
   if (units_changed & DAY_UNIT) {
     update_date(tick_time, units_changed);
+    update_shortdate(tick_time, units_changed);
   }
   if (units_changed & MINUTE_UNIT)
     update_time(tick_time, units_changed);
@@ -116,6 +136,7 @@ void handle_init(void) {
 
   time_create();
   date_create();
+  shortdate_create();
   battery_create();
 
   tick_timer_service_subscribe(SECOND_UNIT, handle_tick);
