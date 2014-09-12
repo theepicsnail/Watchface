@@ -81,6 +81,16 @@ void date_create() {
 }
 // --- end date ---
 
+// --- bluetooth ---
+void bluetooth_handler(bool connected) {
+  if (!connected)
+    vibes_double_pulse();
+}
+void bluetooth_create() {
+  bluetooth_connection_service_subscribe(bluetooth_handler);
+}
+// --- end bluetooth ---
+
 // --- time ---
 static char time_text[] = "23:59";
 TextLayer *time_layer;
@@ -128,6 +138,7 @@ void handle_init(void) {
   time_create();
   date_create();
   shortdate_create();
+  bluetooth_create();
   battery_create();
 
   tick_timer_service_subscribe(SECOND_UNIT, handle_tick);
