@@ -41,10 +41,6 @@ void battery_create() {
 
   layer_add_child(window_layer, battery_bar);
 }
-
-void battery_destroy() {
-  battery_state_service_unsubscribe();
-}
 // --- end battery ---
 
 // --- shortdate ---
@@ -103,10 +99,6 @@ void time_create() {
   text_layer_set_font(time_layer, fonts_get_system_font(FONT_KEY_ROBOTO_BOLD_SUBSET_49));
   layer_add_child(window_layer, text_layer_get_layer(time_layer));
 }
-
-void time_destroy() {
-  tick_timer_service_unsubscribe();
-}
 // --- end time ---
 
 
@@ -124,8 +116,7 @@ void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
 
 void handle_deinit(void) {
   tick_timer_service_unsubscribe();
-  time_destroy();
-  battery_destroy();
+  battery_state_service_unsubscribe();
 }
 
 void handle_init(void) {
