@@ -47,12 +47,33 @@ void battery_destroy() {
 }
 // --- end battery ---
 
+// --- date ---
+static char date_text[] = "Tue, Sep 30";
+TextLayer *date_layer;
+
+static void update_date(struct tm *tick_time, TimeUnits units_changed) {
+  strftime(date_text, sizeof(date_text), "%a, %b %d", tick_time);
+  text_layer_set_text(date_layer, date_text);
+}
+
+void date_create() {
+  date_layer = text_layer_create(GRect(0, 42, WIDTH, 25));
+  text_layer_set_text_color(date_layer, GColorBlack);
+  text_layer_set_text_alignment(date_layer, GTextAlignmentCenter);
+  text_layer_set_background_color(date_layer, GColorWhite);
+  text_layer_set_font(date_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
+  layer_add_child(window_layer, text_layer_get_layer(date_layer));
+  time_t now = time(NULL);
+  update_date(localtime(&now), DAY_UNIT);
+  tick_timer_service_subscribe(DAY_UNIT, update_date);
+}
+// --- end date ---
+
 // --- time ---
 static char time_text[] = "23:59";
 TextLayer *time_layer;
 
 static void update_time(struct tm *tick_time, TimeUnits units_changed) {
-  APP_LOG(APP_LOG_LEVEL_INFO, "Time flies!");
   strftime(time_text, sizeof(time_text), "%R", tick_time);
   text_layer_set_text(time_layer, time_text);
 
@@ -96,6 +117,7 @@ void handle_init(void) {
   window_layer = window_get_root_layer(window);
 
   time_create();
+  date_create();
   battery_create();
 
   tick_timer_service_subscribe(SECOND_UNIT, handle_tick);
