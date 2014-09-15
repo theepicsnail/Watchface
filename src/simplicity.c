@@ -54,9 +54,9 @@ static void update_shortdate(struct tm *tick_time, TimeUnits units_changed) {
 
 void shortdate_create() {
   shortdate_layer = text_layer_create(GRect(0, 67, WIDTH, 25));
-  text_layer_set_text_color(shortdate_layer, GColorBlack);
+  text_layer_set_text_color(shortdate_layer, GColorWhite);
   text_layer_set_text_alignment(shortdate_layer, GTextAlignmentCenter);
-  text_layer_set_background_color(shortdate_layer, GColorWhite);
+  text_layer_set_background_color(shortdate_layer, GColorBlack);
   text_layer_set_font(shortdate_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
   layer_add_child(window_layer, text_layer_get_layer(shortdate_layer));
 }
@@ -73,9 +73,9 @@ static void update_date(struct tm *tick_time, TimeUnits units_changed) {
 
 void date_create() {
   date_layer = text_layer_create(GRect(0, 42, WIDTH, 25));
-  text_layer_set_text_color(date_layer, GColorBlack);
+  text_layer_set_text_color(date_layer, GColorWhite);
   text_layer_set_text_alignment(date_layer, GTextAlignmentCenter);
-  text_layer_set_background_color(date_layer, GColorWhite);
+  text_layer_set_background_color(date_layer, GColorBlack);
   text_layer_set_font(date_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
   layer_add_child(window_layer, text_layer_get_layer(date_layer));
 }
@@ -103,9 +103,9 @@ static void update_time(struct tm *tick_time, TimeUnits units_changed) {
 
 void time_create() {
   time_layer = text_layer_create(GRect(0,-13,WIDTH, 51));// ends at 48
-  text_layer_set_text_color(time_layer, GColorBlack);
+  text_layer_set_text_color(time_layer, GColorWhite);
   text_layer_set_text_alignment(time_layer, GTextAlignmentCenter);
-  text_layer_set_background_color(time_layer, GColorWhite);
+  text_layer_set_background_color(time_layer, GColorBlack);
   text_layer_set_font(time_layer, fonts_get_system_font(FONT_KEY_ROBOTO_BOLD_SUBSET_49));
   layer_add_child(window_layer, text_layer_get_layer(time_layer));
 }
